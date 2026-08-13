@@ -270,7 +270,7 @@ export default function Settings() {
   }
 
   return (
-    <div className="p-4 sm:p-6">
+    <div className="p-4 sm:p-6 pb-24">
       <div className="mb-6">
         <h2 className="font-display text-2xl font-semibold text-ink">Settings</h2>
         <p className="text-sm text-[#8A91A0] mt-0.5">

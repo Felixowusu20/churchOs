@@ -87,11 +87,11 @@ export const defaultHomepageContent = (): HomepageContent => ({
   navLinks: [
     { label: 'Features', href: '#features' },
     { label: 'How it works', href: '#how-it-works' },
-    { label: 'Pricing', href: '#pricing' },
+    { label: 'For churches', href: '#for-churches' },
   ],
   navSignInLabel: 'Sign in',
   navCheckInLabel: 'Member check-in',
-  navDemoLabel: 'Request a demo',
+  navDemoLabel: 'Start for free',
   hero: {
     autoplayMs: 6500,
     slides: [
@@ -100,8 +100,8 @@ export const defaultHomepageContent = (): HomepageContent => ({
         brand: 'ChurchOS',
         headline: 'Quiet tools for the people who keep the church running.',
         subcopy:
-          'Attendance, members, and giving — designed for Sunday mornings, not software demos.',
-        primaryCta: { label: 'Get started', action: 'login' },
+          'Attendance, members, and giving — free for every congregation, built for Sunday mornings.',
+        primaryCta: { label: 'Start for free', action: 'login' },
         secondaryCta: { label: 'See how check-in works', action: 'hash', href: '#how-it-works' },
         imageUrl:
           'https://images.unsplash.com/photo-1438032005730-c779502df39b?auto=format&fit=crop&w=1800&q=80',
@@ -126,9 +126,9 @@ export const defaultHomepageContent = (): HomepageContent => ({
         brand: 'ChurchOS',
         headline: 'Giving and expenses your board can trust.',
         subcopy:
-          'Tithes, offerings, and ministry spend in one ledger — clear enough to share on Monday morning.',
-        primaryCta: { label: 'Request a demo', action: 'login' },
-        secondaryCta: { label: 'View pricing', action: 'hash', href: '#pricing' },
+          'Tithes, offerings, and ministry spend in one ledger — free to use, clear enough to share on Monday morning.',
+        primaryCta: { label: 'Start for free', action: 'login' },
+        secondaryCta: { label: "What's included", action: 'hash', href: '#for-churches' },
         imageUrl:
           'https://images.unsplash.com/photo-1507692049790-de58290a4334?auto=format&fit=crop&w=1800&q=80',
         gradient:
@@ -190,54 +190,38 @@ export const defaultHomepageContent = (): HomepageContent => ({
     attribution: 'Rev. Emmanuel Asante · Grace Chapel',
   },
   pricing: {
-    title: 'Straightforward pricing',
-    subtitle: 'Thirty-day trial on every plan. Cancel anytime.',
+    title: 'Free for every church',
+    subtitle:
+      'No subscriptions, no trials that expire, and no hidden fees. ChurchOS is given to congregations at no cost.',
     plans: [
       {
-        name: 'Starter',
-        price: '$49',
-        period: '/mo',
-        desc: 'For smaller congregations',
-        features: ['Attendance check-in', 'Member records', 'Basic reports', 'Finance tracking', '1 campus'],
-        cta: 'Get started',
-        highlight: false,
-      },
-      {
-        name: 'Growth',
-        price: '$129',
-        period: '/mo',
-        desc: 'For growing churches',
+        name: 'For churches',
+        price: 'Free',
+        period: 'forever',
+        desc: 'Everything your church needs to run Sundays with a clearer record — at no charge.',
         features: [
-          'Everything in Starter',
-          'Events & departments',
-          'Advanced reports',
-          'Up to 3 campuses',
-          'Priority support',
+          'Attendance check-in',
+          'Member records',
+          'Giving and expenses',
+          'Events and departments',
+          'Reports for leadership',
+          'As many campuses as you need',
         ],
-        cta: 'Start free trial',
+        cta: 'Start for free',
         highlight: true,
-      },
-      {
-        name: 'Enterprise',
-        price: 'Custom',
-        period: '',
-        desc: 'For multi-campus ministries',
-        features: ['Unlimited campuses', 'Custom integrations', 'Dedicated support', 'On-site training', 'SLA'],
-        cta: 'Talk to us',
-        highlight: false,
       },
     ],
   },
   closingCta: {
     title: 'Ready when your congregation is',
-    body: 'Set up members, open check-in, and walk into Sunday with a clearer picture of who showed up.',
-    buttonLabel: 'Open ChurchOS',
+    body: 'Set up members, open check-in, and walk into Sunday with a clearer picture of who showed up — free for your church.',
+    buttonLabel: 'Start for free',
   },
   footer: {
-    tagline: 'Church management, kept simple.',
+    tagline: 'Church management, given freely to congregations.',
     links: [
       { label: 'Features', href: '#features' },
-      { label: 'Pricing', href: '#pricing' },
+      { label: 'For churches', href: '#for-churches' },
       { label: 'Privacy', href: '#' },
       { label: 'Terms', href: '#' },
     ],
@@ -249,22 +233,61 @@ export function normalizeHomepageContent(raw: unknown): HomepageContent {
   const base = defaultHomepageContent()
   if (!raw || typeof raw !== 'object') return base
   const input = raw as Partial<HomepageContent>
+
+  const navLinks = (Array.isArray(input.navLinks) ? input.navLinks : base.navLinks).map((link) =>
+    /pricing/i.test(link.label) || link.href === '#pricing'
+      ? { label: 'For churches', href: '#for-churches' }
+      : link,
+  )
+
+  const storedPricing = input.pricing
+  const paidBlob = storedPricing
+    ? `${storedPricing.title} ${storedPricing.subtitle} ${(storedPricing.plans || [])
+        .map((p) => `${p.price} ${p.period} ${p.cta}`)
+        .join(' ')}`
+    : ''
+  const looksPaid = /\$\d|\/mo|trial|enterprise|starter/i.test(paidBlob)
+  const pricing = looksPaid
+    ? base.pricing
+    : {
+        ...base.pricing,
+        ...storedPricing,
+        plans:
+          Array.isArray(storedPricing?.plans) && storedPricing!.plans.length > 0
+            ? storedPricing!.plans.map((p) => ({ ...base.pricing.plans[0], ...p, price: 'Free', period: p.period || 'forever' }))
+            : base.pricing.plans,
+      }
+
+  const navDemoLabel =
+    /demo/i.test(input.navDemoLabel || '') ? base.navDemoLabel : input.navDemoLabel || base.navDemoLabel
+
   return {
     ...base,
     ...input,
     logoUrl: typeof input.logoUrl === 'string' ? input.logoUrl : base.logoUrl,
-    navLinks: Array.isArray(input.navLinks) ? input.navLinks : base.navLinks,
+    navLinks,
+    navDemoLabel,
     hero: {
       autoplayMs: input.hero?.autoplayMs ?? base.hero.autoplayMs,
       slides:
         Array.isArray(input.hero?.slides) && input.hero!.slides.length > 0
-          ? input.hero!.slides.map((s, i) => ({
-              ...base.hero.slides[Math.min(i, base.hero.slides.length - 1)],
-              ...s,
-              id: s.id || `slide-${i + 1}`,
-              primaryCta: { ...base.hero.slides[0].primaryCta, ...s.primaryCta },
-              secondaryCta: { ...base.hero.slides[0].secondaryCta, ...s.secondaryCta },
-            }))
+          ? input.hero!.slides.map((s, i) => {
+              const primaryCta = { ...base.hero.slides[0].primaryCta, ...s.primaryCta }
+              const secondaryCta = { ...base.hero.slides[0].secondaryCta, ...s.secondaryCta }
+              if (/demo/i.test(primaryCta.label)) primaryCta.label = 'Start for free'
+              if (secondaryCta.href === '#pricing' || /pricing/i.test(secondaryCta.label)) {
+                secondaryCta.label = "What's included"
+                secondaryCta.action = 'hash'
+                secondaryCta.href = '#for-churches'
+              }
+              return {
+                ...base.hero.slides[Math.min(i, base.hero.slides.length - 1)],
+                ...s,
+                id: s.id || `slide-${i + 1}`,
+                primaryCta,
+                secondaryCta,
+              }
+            })
           : base.hero.slides,
     },
     features: {
@@ -278,16 +301,22 @@ export function normalizeHomepageContent(raw: unknown): HomepageContent {
       steps: Array.isArray(input.howItWorks?.steps) ? input.howItWorks!.steps : base.howItWorks.steps,
     },
     testimonial: { ...base.testimonial, ...input.testimonial },
-    pricing: {
-      ...base.pricing,
-      ...input.pricing,
-      plans: Array.isArray(input.pricing?.plans) ? input.pricing!.plans : base.pricing.plans,
+    pricing,
+    closingCta: {
+      ...base.closingCta,
+      ...input.closingCta,
+      buttonLabel: /demo|open churchos/i.test(input.closingCta?.buttonLabel || '')
+        ? base.closingCta.buttonLabel
+        : input.closingCta?.buttonLabel || base.closingCta.buttonLabel,
     },
-    closingCta: { ...base.closingCta, ...input.closingCta },
     footer: {
       ...base.footer,
       ...input.footer,
-      links: Array.isArray(input.footer?.links) ? input.footer!.links : base.footer.links,
+      links: (Array.isArray(input.footer?.links) ? input.footer!.links : base.footer.links).map((link) =>
+        /pricing/i.test(link.label) || link.href === '#pricing'
+          ? { label: 'For churches', href: '#for-churches' }
+          : link,
+      ),
     },
   }
 }

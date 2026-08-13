@@ -39,12 +39,10 @@ function resolveCta(cta: HomepageCta, onNavigate: (page: string) => void) {
 function HeroCarousel({
   slides,
   autoplayMs,
-  logoUrl,
   onNavigate,
 }: {
   slides: HeroSlide[]
   autoplayMs: number
-  logoUrl?: string
   onNavigate: (page: string) => void
 }) {
   const [index, setIndex] = useState(0)
@@ -102,19 +100,6 @@ function HeroCarousel({
 
       <div className="relative max-w-6xl mx-auto w-full px-5 sm:px-8 pb-16 sm:pb-24 pt-28 sm:pt-36">
         <div key={animKey} className="animate-fade-in-slow">
-          {logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={logoUrl}
-              src={logoUrl}
-              alt=""
-              className="h-16 sm:h-20 lg:h-24 w-auto max-w-[min(100%,320px)] object-contain mb-6 drop-shadow-[0_2px_16px_rgba(0,0,0,0.45)]"
-            />
-          ) : (
-            <p className="font-display text-[3.4rem] sm:text-6xl lg:text-7xl font-semibold text-white tracking-tight mb-4 sm:mb-5 leading-[0.95]">
-              {slide.brand}
-            </p>
-          )}
           <h1 className="font-display text-2xl sm:text-3xl lg:text-[2.35rem] text-white/92 font-medium max-w-xl leading-[1.25] mb-4">
             {slide.headline}
           </h1>
@@ -220,18 +205,12 @@ export default function Landing({ onNavigate, isSignedIn = false }: LandingProps
             : 'bg-transparent border-b border-transparent'
         }`}
       >
-        <div className="max-w-6xl mx-auto px-5 sm:px-8 h-[4.25rem] flex items-center justify-between">
-          <span
-            className={`font-display text-2xl font-semibold tracking-tight transition-colors ${
-              scrolled || mobileOpen ? 'text-ink' : 'text-white'
-            }`}
-          >
-            <SiteBrand
-              content={content}
-              variant={scrolled || mobileOpen ? 'on-light' : 'on-hero'}
-              className="text-2xl"
-            />
-          </span>
+        <div className="max-w-6xl mx-auto px-5 sm:px-8 min-h-[4.5rem] py-2 flex items-center justify-between gap-4">
+          <SiteBrand
+            content={content}
+            variant={scrolled || mobileOpen ? 'on-light' : 'on-hero'}
+            size="nav"
+          />
           <div className="hidden md:flex items-center gap-8">
             {content.navLinks.map((item) => (
               <a
@@ -326,7 +305,6 @@ export default function Landing({ onNavigate, isSignedIn = false }: LandingProps
       <HeroCarousel
         slides={content.hero.slides}
         autoplayMs={content.hero.autoplayMs}
-        logoUrl={content.logoUrl}
         onNavigate={onNavigate}
       />
 
@@ -401,64 +379,54 @@ export default function Landing({ onNavigate, isSignedIn = false }: LandingProps
         </div>
       </section>
 
-      <section id="pricing" className="py-22 sm:py-28 bg-white/70 border-y border-[#E4E0DA]">
+      <section id="for-churches" className="py-22 sm:py-28 bg-white/70 border-y border-[#E4E0DA]">
         <div className="max-w-6xl mx-auto px-5 sm:px-8">
-          <div className="max-w-xl mb-14">
-            <p className="text-accent text-xs font-semibold tracking-[0.18em] uppercase mb-3">Plans</p>
-            <h2 className="font-display text-3xl sm:text-4xl lg:text-[2.75rem] font-semibold text-ink mb-3 leading-tight">
-              {content.pricing.title}
-            </h2>
-            <p className="text-[#5C6578] text-[15px]">{content.pricing.subtitle}</p>
-          </div>
-          <div className="grid lg:grid-cols-3 gap-5 items-stretch">
-            {content.pricing.plans.map((plan, i) => (
-              <div
-                key={`${plan.name}-${i}`}
-                className={`relative p-8 rounded-lg flex flex-col transition-transform duration-300 hover:-translate-y-0.5 ${
-                  plan.highlight
-                    ? 'bg-primary text-white shadow-[0_24px_48px_-28px_rgba(31,45,77,0.65)] lg:scale-[1.02]'
-                    : 'bg-[#F7F5F2] border border-[#E4E0DA]'
-                }`}
+          <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-16 items-center">
+            <div>
+              <p className="text-accent text-xs font-semibold tracking-[0.18em] uppercase mb-3">Always free</p>
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-[2.75rem] font-semibold text-ink mb-3 leading-tight">
+                {content.pricing.title}
+              </h2>
+              <p className="text-[#5C6578] text-[15px] leading-relaxed max-w-lg mb-8">
+                {content.pricing.subtitle}
+              </p>
+              <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-3 mb-9">
+                {(content.pricing.plans[0]?.features || []).map((feat) => (
+                  <li key={feat} className="flex items-start gap-2.5">
+                    <Check size={14} className="mt-0.5 shrink-0 text-accent" />
+                    <span className="text-sm text-[#3D4555]">{feat}</span>
+                  </li>
+                ))}
+              </ul>
+              <button
+                type="button"
+                onClick={() => onNavigate('login')}
+                className="btn-primary px-7 py-3.5 text-sm font-medium rounded-md inline-flex items-center gap-2"
               >
-                <p className={`text-sm font-medium mb-1 ${plan.highlight ? 'text-accent-soft' : 'text-[#5C6578]'}`}>
-                  {plan.name}
-                  {plan.highlight ? ' · Recommended' : ''}
+                {content.pricing.plans[0]?.cta || 'Start for free'}
+                <ArrowRight size={16} />
+              </button>
+            </div>
+            <div className="relative rounded-lg bg-primary text-white px-8 py-10 sm:px-10 overflow-hidden">
+              <div
+                className="absolute inset-0 opacity-70"
+                style={{
+                  background:
+                    'radial-gradient(ellipse at 20% 0%, rgba(154,123,79,0.4), transparent 50%), radial-gradient(ellipse at 100% 100%, rgba(42,61,104,0.7), transparent 45%)',
+                }}
+              />
+              <div className="relative">
+                <p className="text-accent-soft text-xs font-semibold tracking-[0.16em] uppercase mb-4">
+                  For congregations
                 </p>
-                <div className="flex items-baseline gap-1 mb-1">
-                  <span
-                    className={`font-display text-4xl font-semibold ${plan.highlight ? 'text-white' : 'text-ink'}`}
-                  >
-                    {plan.price}
-                  </span>
-                  <span className={`text-sm ${plan.highlight ? 'text-white/60' : 'text-[#8A91A0]'}`}>
-                    {plan.period}
-                  </span>
-                </div>
-                <p className={`text-sm mb-7 ${plan.highlight ? 'text-white/70' : 'text-[#5C6578]'}`}>{plan.desc}</p>
-                <button
-                  type="button"
-                  onClick={() => onNavigate('login')}
-                  className={`w-full py-2.5 rounded-md text-sm font-medium mb-7 transition-colors ${
-                    plan.highlight ? 'bg-accent text-white hover:bg-accent-soft' : 'btn-primary'
-                  }`}
-                >
-                  {plan.cta}
-                </button>
-                <ul className="space-y-3 mt-auto">
-                  {plan.features.map((feat, j) => (
-                    <li key={j} className="flex items-start gap-2.5">
-                      <Check
-                        size={14}
-                        className={`mt-0.5 shrink-0 ${plan.highlight ? 'text-accent-soft' : 'text-accent'}`}
-                      />
-                      <span className={`text-sm ${plan.highlight ? 'text-white/85' : 'text-[#3D4555]'}`}>
-                        {feat}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                <p className="font-display text-6xl sm:text-7xl font-semibold leading-none mb-2">Free</p>
+                <p className="text-white/55 text-sm mb-6">for churches, forever</p>
+                <p className="text-white/75 text-sm leading-relaxed">
+                  {content.pricing.plans[0]?.desc ||
+                    'Built as a gift to the church — use every tool without a subscription.'}
+                </p>
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>
@@ -499,7 +467,7 @@ export default function Landing({ onNavigate, isSignedIn = false }: LandingProps
         <div className="max-w-6xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row justify-between gap-8">
           <div>
             <p className="font-display text-xl font-semibold text-ink mb-1.5">
-              <SiteBrand content={content} variant="on-light" className="text-xl" />
+            <SiteBrand content={content} variant="on-light" size="nav" />
             </p>
             <p className="text-sm text-[#8A91A0] max-w-xs">{content.footer.tagline}</p>
           </div>

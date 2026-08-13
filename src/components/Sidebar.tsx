@@ -61,10 +61,8 @@ export default function Sidebar({ active, onNavigate, mobileOpen, onMobileToggle
           }}
         />
 
-        <div className="relative flex items-center justify-between px-5 py-5 border-b border-white/[0.08]">
-          <p className="font-display text-xl font-semibold text-white tracking-tight">
-            <SiteBrand content={content} variant="on-dark" className="text-xl" imageClassName="h-8 max-h-8 max-w-[140px]" />
-          </p>
+        <div className="relative flex items-center justify-between px-5 py-4 border-b border-white/[0.08]">
+          <SiteBrand content={content} variant="on-dark" size="mark" />
           <button type="button" onClick={onMobileToggle} className="lg:hidden text-white/50 hover:text-white">
             <X size={18} />
           </button>

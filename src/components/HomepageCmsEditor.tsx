@@ -11,6 +11,7 @@ import {
   type HeroSlide,
 } from '../lib/homepage'
 import { notifyHomepageUpdated } from '../hooks/useHomepage'
+import SiteBrand from './SiteBrand'
 
 type ToastFn = (type: 'success' | 'error', message: string) => void
 
@@ -124,12 +125,12 @@ export default function HomepageCmsEditor({ showToast }: { showToast: ToastFn })
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 pb-16">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h3 className="font-display text-xl font-semibold text-ink">Homepage CMS</h3>
           <p className="text-xs text-[#8A91A0] mt-0.5">
-            Edit the public landing page — logo, hero carousel, features, pricing, and footer
+            Edit the public landing page — logo, hero, features, and free-for-churches copy
           </p>
         </div>
         <div className="flex gap-2">
@@ -159,64 +160,54 @@ export default function HomepageCmsEditor({ showToast }: { showToast: ToastFn })
         </div>
       )}
 
-      <div className="panel rounded-lg p-5 space-y-4">
-        <h4 className="text-sm font-medium text-ink">Logo & navigation</h4>
-        <div className="flex items-start gap-4 pb-4 border-b border-[#EDE9E4]">
-          <div className="w-16 h-16 rounded-md overflow-hidden bg-[#F8F6F3] border border-[#E4E0DA] flex items-center justify-center shrink-0 p-1.5">
-            {content.logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={content.logoUrl}
-                src={content.logoUrl}
-                alt=""
-                className="max-w-full max-h-full object-contain"
-              />
-            ) : (
-              <span className="font-display text-sm font-semibold text-ink leading-none text-center">
-                {content.brand}
-                <span className="text-accent">{content.brandAccent}</span>
-              </span>
-            )}
+      <div className="panel rounded-lg p-5 space-y-5">
+        <h4 className="text-sm font-medium text-ink">Logo & brand</h4>
+
+        <div className="grid sm:grid-cols-2 gap-3 rounded-xl overflow-hidden border border-[#E4E0DA]">
+          <div className="bg-[#F7F5F2] px-6 py-10 flex items-center justify-center min-h-[220px]">
+            <SiteBrand content={content} variant="on-light" size="preview" />
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-ink mb-0.5">Site logo</p>
-            <p className="text-[11px] text-[#8A91A0] mb-2">
-              Shown in the header, footer, and sign-in. PNG or SVG with a transparent background works best.
-            </p>
-            <div className="flex flex-wrap items-center gap-2">
-              <label className="inline-flex items-center gap-1.5 text-xs font-medium text-primary border border-[#E4E0DA] rounded-md px-3 py-1.5 hover:bg-[#F8F6F3] cursor-pointer">
-                <ImagePlus size={13} />
-                {uploading ? 'Uploading…' : content.logoUrl ? 'Change logo' : 'Upload logo'}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  disabled={uploading}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) void uploadLogo(file)
-                    e.target.value = ''
-                  }}
-                />
-              </label>
-              {content.logoUrl ? (
-                <button
-                  type="button"
-                  onClick={() => patch({ ...content, logoUrl: '' })}
-                  className="text-xs font-medium text-[#8A91A0] hover:text-danger px-2 py-1.5"
-                >
-                  Remove
-                </button>
-              ) : null}
-            </div>
-            <input
-              value={content.logoUrl}
-              onChange={(e) => patch({ ...content, logoUrl: e.target.value })}
-              placeholder="Or paste a logo image URL"
-              className="input-field w-full mt-2 px-3 py-2 rounded-md text-sm"
-            />
+          <div className="bg-primary px-6 py-10 flex items-center justify-center min-h-[220px]">
+            <SiteBrand content={content} variant="on-dark" size="preview" />
           </div>
         </div>
+        <p className="text-[11px] text-[#8A91A0] -mt-2">
+          Live preview · light header and dark hero. Logo sits above the brand + accent.
+        </p>
+
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <label className="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary border border-[#E4E0DA] rounded-md px-3 py-2 hover:bg-[#F8F6F3] cursor-pointer">
+            <ImagePlus size={13} />
+            {uploading ? 'Uploading…' : content.logoUrl ? 'Change logo' : 'Upload logo'}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              disabled={uploading}
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) void uploadLogo(file)
+                e.target.value = ''
+              }}
+            />
+          </label>
+          {content.logoUrl ? (
+            <button
+              type="button"
+              onClick={() => patch({ ...content, logoUrl: '' })}
+              className="text-xs font-medium text-[#8A91A0] hover:text-danger px-2 py-1.5"
+            >
+              Remove logo
+            </button>
+          ) : null}
+        </div>
+        <input
+          value={content.logoUrl}
+          onChange={(e) => patch({ ...content, logoUrl: e.target.value })}
+          placeholder="Or paste a logo image URL"
+          className="input-field w-full px-3 py-2 rounded-md text-sm"
+        />
+
         <div className="grid sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-[11px] text-[#8A91A0] mb-1">Brand</label>
@@ -535,69 +526,29 @@ export default function HomepageCmsEditor({ showToast }: { showToast: ToastFn })
       </div>
 
       <div className="panel rounded-lg p-5 space-y-4">
-        <h4 className="text-sm font-medium text-ink">Pricing</h4>
+        <h4 className="text-sm font-medium text-ink">Free for churches</h4>
+        <p className="text-[11px] text-[#8A91A0] -mt-2">
+          ChurchOS is free for congregations. This section appears on the public homepage — no price tags.
+        </p>
         <input
           value={content.pricing.title}
           onChange={(e) =>
             patch({ ...content, pricing: { ...content.pricing, title: e.target.value } })
           }
           className="input-field w-full px-3 py-2 rounded-md text-sm"
+          placeholder="Section title"
         />
-        <input
+        <textarea
           value={content.pricing.subtitle}
           onChange={(e) =>
             patch({ ...content, pricing: { ...content.pricing, subtitle: e.target.value } })
           }
-          className="input-field w-full px-3 py-2 rounded-md text-sm"
+          rows={2}
+          className="input-field w-full px-3 py-2 rounded-md text-sm resize-none"
+          placeholder="Free-for-churches message"
         />
-        {content.pricing.plans.map((plan, i) => (
+        {(content.pricing.plans[0] ? [content.pricing.plans[0]] : []).map((plan, i) => (
           <div key={i} className="p-3 rounded-md bg-[#F8F6F3] space-y-2">
-            <div className="grid sm:grid-cols-4 gap-2">
-              <input
-                value={plan.name}
-                onChange={(e) => {
-                  const plans = content.pricing.plans.map((p, idx) =>
-                    idx === i ? { ...p, name: e.target.value } : p,
-                  )
-                  patch({ ...content, pricing: { ...content.pricing, plans } })
-                }}
-                className="input-field px-2 py-2 rounded-md text-sm"
-                placeholder="Name"
-              />
-              <input
-                value={plan.price}
-                onChange={(e) => {
-                  const plans = content.pricing.plans.map((p, idx) =>
-                    idx === i ? { ...p, price: e.target.value } : p,
-                  )
-                  patch({ ...content, pricing: { ...content.pricing, plans } })
-                }}
-                className="input-field px-2 py-2 rounded-md text-sm"
-                placeholder="Price"
-              />
-              <input
-                value={plan.period}
-                onChange={(e) => {
-                  const plans = content.pricing.plans.map((p, idx) =>
-                    idx === i ? { ...p, period: e.target.value } : p,
-                  )
-                  patch({ ...content, pricing: { ...content.pricing, plans } })
-                }}
-                className="input-field px-2 py-2 rounded-md text-sm"
-                placeholder="/mo"
-              />
-              <input
-                value={plan.cta}
-                onChange={(e) => {
-                  const plans = content.pricing.plans.map((p, idx) =>
-                    idx === i ? { ...p, cta: e.target.value } : p,
-                  )
-                  patch({ ...content, pricing: { ...content.pricing, plans } })
-                }}
-                className="input-field px-2 py-2 rounded-md text-sm"
-                placeholder="CTA"
-              />
-            </div>
             <input
               value={plan.desc}
               onChange={(e) => {
@@ -609,6 +560,17 @@ export default function HomepageCmsEditor({ showToast }: { showToast: ToastFn })
               className="input-field w-full px-2 py-2 rounded-md text-sm"
               placeholder="Short description"
             />
+            <input
+              value={plan.cta}
+              onChange={(e) => {
+                const plans = content.pricing.plans.map((p, idx) =>
+                  idx === i ? { ...p, cta: e.target.value } : p,
+                )
+                patch({ ...content, pricing: { ...content.pricing, plans } })
+              }}
+              className="input-field w-full px-2 py-2 rounded-md text-sm"
+              placeholder="Button label (e.g. Start for free)"
+            />
             <textarea
               value={plan.features.join('\n')}
               onChange={(e) => {
@@ -618,23 +580,10 @@ export default function HomepageCmsEditor({ showToast }: { showToast: ToastFn })
                 )
                 patch({ ...content, pricing: { ...content.pricing, plans } })
               }}
-              rows={3}
+              rows={5}
               className="input-field w-full px-2 py-2 rounded-md text-sm resize-none"
-              placeholder="One feature per line"
+              placeholder="One included tool per line"
             />
-            <label className="inline-flex items-center gap-2 text-xs text-[#5C6578]">
-              <input
-                type="checkbox"
-                checked={plan.highlight}
-                onChange={(e) => {
-                  const plans = content.pricing.plans.map((p, idx) =>
-                    idx === i ? { ...p, highlight: e.target.checked } : p,
-                  )
-                  patch({ ...content, pricing: { ...content.pricing, plans } })
-                }}
-              />
-              Highlighted plan
-            </label>
           </div>
         ))}
       </div>

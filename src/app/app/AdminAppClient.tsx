@@ -103,15 +103,16 @@ export default function AdminAppClient() {
   }
 
   return (
-    <div className={`min-h-screen bg-[#F7F5F2] ${darkMode ? 'dark' : ''}`}>
+    <div className={`h-[100dvh] max-h-[100dvh] overflow-hidden bg-[#F7F5F2] flex flex-col ${darkMode ? 'dark' : ''}`}>
       <OfflineBanner />
+      <div className="relative flex-1 min-h-0">
       <Sidebar
         active={page}
         onNavigate={navigatePage}
         mobileOpen={mobileOpen}
         onMobileToggle={() => setMobileOpen(!mobileOpen)}
       />
-      <div className="lg:pl-60 min-h-screen min-h-[100dvh] flex flex-col">
+      <div className="lg:pl-60 h-full min-h-0 flex flex-col overflow-hidden">
         <Header
           title={titles.title}
           subtitle={subtitle}
@@ -119,7 +120,7 @@ export default function AdminAppClient() {
           darkMode={darkMode}
           onDarkToggle={() => setDarkMode(!darkMode)}
         />
-        <main className="flex-1 overflow-auto min-h-0 overscroll-contain pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+        <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y pb-[max(1rem,env(safe-area-inset-bottom))]">
           {page === 'dashboard' && canAccessPage(role, 'dashboard') && (
             <DashboardHome onNavigate={navigatePage} onOpenKiosk={openKiosk} />
           )}
@@ -131,6 +132,7 @@ export default function AdminAppClient() {
           {page === 'reports' && canAccessPage(role, 'reports') && <Reports />}
           {page === 'settings' && canAccessPage(role, 'settings') && <Settings />}
         </main>
+      </div>
       </div>
     </div>
   )
