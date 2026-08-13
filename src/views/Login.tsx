@@ -76,7 +76,7 @@ export default function Login({ onNavigate, nextPath }: LoginProps) {
         <div className="absolute inset-0 landing-grain opacity-30 mix-blend-overlay" />
         <div className="relative z-10 flex flex-col justify-between p-10 xl:p-14 text-white w-full">
           <p className="font-display text-2xl font-semibold tracking-tight">
-            <SiteBrand content={content} variant="on-dark" className="text-2xl" />
+            <SiteBrand content={content} variant="on-dark" size="nav" />
           </p>
           <div className="animate-fade-in-slow">
             <div className="w-10 h-px bg-accent-soft/70 mb-6" />
@@ -110,7 +110,7 @@ export default function Login({ onNavigate, nextPath }: LoginProps) {
 
           <div className="animate-fade-in">
             <p className="lg:hidden font-display text-2xl font-semibold text-ink mb-8">
-              <SiteBrand content={content} variant="on-light" className="text-2xl" />
+              <SiteBrand content={content} variant="on-light" size="nav" />
             </p>
             <h1 className="font-display text-[2rem] sm:text-3xl font-semibold text-ink mb-2 leading-tight">
               {mode === 'register' ? 'Create admin account' : 'Welcome back'}
