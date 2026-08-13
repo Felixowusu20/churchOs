@@ -1,0 +1,161 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  title        String   @default("Administrator")
+  phone        String   @default("")
+  role         String   @default("Super Admin")
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  financeEntries FinanceEntry[]
+  members        Member[]
+}
+
+model Department {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String   @default("")
+  leaderName  String   @default("")
+  meetingDay  String   @default("")
+  meetingTime String   @default("")
+  color       String   @default("#1F2D4D")
+  bg          String   @default("#F0EBE3")
+  status      String   @default("Active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members Member[]
+  events  ChurchEvent[]
+
+  @@index([status])
+}
+
+model Member {
+  id                   String      @id @default(cuid())
+  memberCode           String      @unique
+  fullName             String
+  gender               String
+  dob                  DateTime    @db.Date
+  phone                String
+  address              String
+  teachingClass        String
+  /** Denormalized department name for filters / display */
+  department           String
+  departmentId         String?
+  departmentRef        Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  baptized             Boolean     @default(false)
+  dateJoined           DateTime    @db.Date
+  occupation           String
+  maritalStatus        String
+  emergencyContact     String
+  email                String      @default("")
+  status               String      @default("Active")
+  avatarUrl            String?
+  fingerprintEnrolled  Boolean     @default(false)
+  /** WebAuthn credential id (base64url) from phone / laptop biometrics */
+  fingerprintCredentialId String?  @unique
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+  createdById          String?
+  createdBy            Admin?      @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([department])
+  @@index([departmentId])
+  @@index([teachingClass])
+  @@index([fullName])
+  @@index([phone])
+  @@index([fingerprintEnrolled])
+}
+
+model ChurchEvent {
+  id           String      @id @default(cuid())
+  code         String      @unique
+  title        String
+  type         String
+  dateLabel    String
+  timeLabel    String
+  venue        String
+  capacity     Int
+  registered   Int         @default(0)
+  color        String
+  bg           String
+  status       String
+  biometric    Boolean     @default(false)
+  imageUrl     String?
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  checkIns     EventCheckIn[]
+
+  @@index([departmentId])
+  @@index([status])
+}
+
+model EventCheckIn {
+  id         String      @id @default(cuid())
+  eventId    String
+  event      ChurchEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  memberId   String?
+  memberCode String
+  memberName String
+  department String      @default("")
+  status     String      @default("Present")
+  checkedAt  DateTime    @default(now())
+  createdAt  DateTime    @default(now())
+
+  @@unique([eventId, memberCode])
+  @@index([checkedAt])
+  @@index([eventId, checkedAt])
+  @@index([memberCode])
+}
+
+enum FinanceKind {
+  INCOME
+  EXPENSE
+}
+
+model FinanceEntry {
+  id          String      @id @default(cuid())
+  kind        FinanceKind
+  category    String
+  amount      Float
+  method      String?
+  memberName  String?
+  description String?
+  notes       String?
+  status      String      @default("Verified")
+  approvedBy  String?
+  receiptUrl  String?
+  occurredAt  DateTime
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  createdById String?
+  createdBy   Admin?      @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([kind, occurredAt])
+  @@index([category])
+}
+
+/** Keyed CMS documents (homepage, etc.) stored as JSON. */
+model SiteContent {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  content   Json
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
